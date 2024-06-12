@@ -1,26 +1,26 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const bodyParser = require('body-parser');
 
-dotenv.config();
+const db = require('./utils/db');
 
 const app = express();
-app.use(bodyParser.json());
+
+// Connect Database
+db();
+
+// Init Middleware
+app.use(express.json({ extended: false }));
+
+// Define Routes
+app.use('/api', require('./routes/api'));
+
+app.get('/', (req, res) => {
+    return res.status(200).json({home: 'home'})
+})
+
+app.get('/home', (req, res) => {
+    return res.status(200).json({message: 'hello'})
+})
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
-
-app.get('/', (req, res) => {
-  res.send('RoomSense API');
-});
-
-const roomRoutes = require('./routes/roomRoutes');
-app.use('/api/rooms', roomRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
